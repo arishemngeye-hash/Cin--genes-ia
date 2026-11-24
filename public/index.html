@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CINÉ-GENESIS AI</title>
+
+<style>
+:root{
+--bg:#0b0d12;
+--panel:#151923;
+--line:#2b3240;
+--gold:#e7b85a;
+--muted:#a6adbb;
+--text:#f4f5f7
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+background:radial-gradient(ellipse at top,#20202a 0,#0b0d12 55%);
+color:var(--text);
+font:15px system-ui,-apple-system,sans-serif
+}
+
+header{
+padding:22px 18px;
+border-bottom:1px solid var(--line);
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+flex-wrap:wrap
+}
+
+.logo{
+font-weight:900;
+letter-spacing:1.5px
+}
+
+.logo span{color:var(--gold)}
+
+.status{
+font-size:12px;
+color:var(--muted);
+padding:8px 12px;
+border:1px solid var(--line);
+border-radius:20px
+}
+
+main{
+max-width:1100px;
+margin:auto;
+padding:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px
+}
+
+.panel{
+background:rgba(21,25,35,.96);
+border:1px solid var(--line);
+border-radius:16px;
+padding:18px;
+min-width:0
+}
+
+h1{
+font-size:clamp(24px,4vw,38px);
+margin:0 0 8px
+}
+
+h2{
+font-size:18px;
+margin:0 0 15px
+}
+
+p{
+color:var(--muted);
+line-height:1.5
+}
+
+label{
+display:block;
+font-size:13px;
+color:#c8ced8;
+margin:14px 0 7px
+}
+
+input,textarea,select{
+width:100%;
+background:#0d1118;
+border:1px solid #343c4b;
+color:var(--text);
+padding:12px;
+border-radius:10px;
+font:inherit
+}
+
+textarea{
+min-height:130px;
+resize:vertical
+}
+
+button{
+border:0;
+border-radius:10px;
+padding:12px 16px;
+font-weight:750;
+cursor:pointer;
+background:var(--gold);
+color:#17130b
+}
+
+button.secondary{
+background:#293141;
+color:#e9edf4
+}
+
+button:disabled{
+opacity:.5;
+cursor:wait
+}
+
+.row{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:14px
+}
+
+.row button{flex:1}
+
+.preview{
+background:#080a0e;
+border:1px dashed #3a4352;
+border-radius:14px;
+min-height:290px;
+display:flex;
+align-items:center;
+justify-content:center;
+overflow:hidden;
+text-align:center;
+color:var(--muted);
+padding:12px
+}
+
+.preview img{
+max-width:100%;
+max-height:520px;
+border-radius:8px
+}
+
+.small{
+font-size:12px;
+color:var(--muted)
+}
+
+.characters{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:8px
+}
+
+.char{
+background:#0d1118;
+border:1px solid var(--line);
+border-radius:10px;
+padding:9px;
+text-align:center;
+font-size:12px
+}
+
+.char strong{
+display:block;
+color:var(--gold);
+margin-bottom:4px
+}
+
+.notice{
+background:#221d12;
+border:1px solid #554528;
+color:#e8d5a8;
+padding:12px;
+border-radius:10px;
+font-size:12px;
+line-height:1.5
+}
+
+.result{
+margin-top:12px;
+word-break:break-word
+}
+
+.result a{color:var(--gold)}
+
+.footer{
+max-width:1100px;
+margin:0 auto;
+padding:0 20px 30px;
+color:var(--muted);
+font-size:12px
+}
+
+@media(max-width:760px){
+main{
+grid-template-columns:1fr;
+padding:12px
+}
+.panel{padding:15px}
+header{padding:18px 14px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="logo">CINÉ-GENESIS <span>AI</span></div>
+<div class="status" id="status">Connexion au serveur…</div>
+</header>
+
+<main>
+
+<section class="panel">
+
+<h1>Donne vie à tes histoires</h1>
+
+<p>
+Studio IA pour créer les images de tes épisodes TikTok
+de mythologie égyptienne.
+</p>
+
+<div class="characters">
+<div class="char"><strong>HORUS</strong>Faucon • bleu/or</div>
+<div class="char"><strong>ANUBIS</strong>Chacal • noir/or</div>
+<div class="char"><strong>SÉTH</strong>Chaos • rouge/noir</div>
+<div class="char"><strong>ISIS</strong>Magie • blanc/or</div>
+<div class="char"><strong>OSIRIS</strong>Au-delà • vert/or</div>
+<div class="char"><strong>RÊ</strong>Soleil • or/bleu</div>
+</div>
+
+<label for="episode">Épisode / titre</label>
+
+<input id="episode" value="Épisode 1 — La naissance des dieux">
+
+<label for="prompt">Prompt de la scène</label>
+
+<textarea id="prompt">Scène cinématographique mythologique égyptienne, un océan primordial sombre se transforme en lumière dorée, les temples anciens émergent dans une brume mystique. Mouvement de caméra lent et épique, particules lumineuses, réalisme fantastique, détails riches, format vertical TikTok 9:16. Aucun texte à l'écran.</textarea>
+
+<p class="small">
+Le modèle crée une image verticale 9:16 à partir de ton prompt.
+</p>
+
+<div class="row">
+<button id="generate">Générer une image</button>
+<button class="secondary" id="copy">Copier le prompt</button>
+</div>
+
+<div class="notice" style="margin-top:14px">
+La génération utilise Replicate et peut consommer les crédits de ton compte. Vérifie le prix du modèle avant de lancer une génération.
+</div>
+
+<div class="result" id="result" aria-live="polite"></div>
+
+</section>
+
+<section class="panel">
+
+<h2>Aperçu / résultat</h2>
+
+<div class="preview" id="preview">
+L’image générée apparaîtra ici.
+</div>
+
+<h2 style="margin-top:18px">Checklist TikTok</h2>
+
+<p>
+✓ Format vertical 9:16<br>
+✓ Hook visuel dès la première seconde<br>
+✓ Une seule scène claire<br>
+✓ Suspense à la fin<br>
+✓ Ajouter narration et sous-titres dans ton éditeur vidéo
+</p>
+
+<h2 style="margin-top:18px">Sécurité</h2>
+
+<p class="small">
+La clé API Replicate reste sur le serveur Render.
+Elle n’est jamais envoyée au navigateur.
+Ne publie jamais ton jeton API dans ce fichier HTML.
+</p>
+
+</section>
+
+</main>
+
+<div class="footer">
+CINÉ-GENESIS AI • Interface connectée au serveur Render et à Replicate.
+</div>
+
+<script>
+const API_BASE = "https://cin-genesis-ia.onrender.com";
+
+const $ = id => document.getElementById(id);
+
+let busy = false;
+
+function findImageUrl(output) {
+  if (typeof output === "string") {
+    return output.startsWith("https://") ? output : null;
+  }
+
+  if (Array.isArray(output)) {
+    for (const item of output) {
+      const url = findImageUrl(item);
+      if (url) return url;
+    }
+  }
+
+  if (output && typeof output === "object") {
+    for (const value of Object.values(output)) {
+      const url = findImageUrl(value);
+      if (url) return url;
+    }
+  }
+
+  return null;
+}
+
+async function check() {
+  try {
+    const response = await fetch(API_BASE + "/api/health");
+    const data = await response.json();
+
+    if (data.ok && data.apiKeyConfigured) {
+      $("status").textContent = "Serveur Render connecté";
+    } else {
+      $("status").textContent = "Clé API à vérifier";
+    }
+  } catch {
+    $("status").textContent = "Serveur non connecté";
+  }
+}
+
+$("copy").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText($("prompt").value);
+    $("result").textContent = "Prompt copié.";
+  } catch {
+    $("result").textContent = "Impossible de copier le prompt.";
+  }
+};
+
+$("generate").onclick = async () => {
+  if (busy) return;
+
+  const prompt =
+    $("episode").value + ". " + $("prompt").value;
+
+  busy = true;
+  $("generate").disabled = true;
+  $("result").textContent = "Envoi à Replicate…";
+
+  try {
+    const response = await fetch(
+      API_BASE + "/api/generate-image",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          prompt: prompt,
+          aspect_ratio: "9:16"
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Erreur du serveur");
+    }
+
+    if (!data.id) {
+      throw new Error("Identifiant de génération absent.");
+    }
+
+    $("result").textContent =
+      "Génération de l’image en cours…";
+
+    let completed = false;
+
+    for (let i = 0; i < 60; i++) {
+      await new Promise(resolve =>
+        setTimeout(resolve, 4000)
+      );
+
+      const checkResponse = await fetch(
+        API_BASE + "/api/predictions/" +
+        encodeURIComponent(data.id)
+      );
+
+      const prediction = await checkResponse.json();
+
+      if (!checkResponse.ok) {
+        throw new Error(
+          prediction.error || "Erreur de suivi"
+        );
+      }
+
+      if (prediction.status === "succeeded") {
+        const imageUrl = findImageUrl(prediction.output);
+
+        if (!imageUrl) {
+          throw new Error(
+            "Image terminée, mais URL introuvable."
+          );
+        }
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = "Image générée par Ciné-Genesis AI";
+
+        $("preview").replaceChildren(img);
+
+        const link = document.createElement("a");
+        link.href = imageUrl;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "Ouvrir ou enregistrer l’image";
+
+        $("result").replaceChildren(
+          document.createTextNode("Image prête : "),
+          link
+        );
+
+        completed = true;
+        break;
+      }
+
+      if (
+        prediction.status === "failed" ||
+        prediction.status === "canceled"
+      ) {
+        throw new Error(
+          prediction.error || "La génération a échoué."
+        );
+      }
+
+      $("result").textContent =
+        "Génération en cours : " +
+        prediction.status + "…";
+    }
+
+    if (!completed) {
+      $("result").textContent =
+        "La génération prend du temps. Réessaie dans quelques instants.";
+    }
+
+  } catch (error) {
+    $("result").textContent =
+      "Erreur : " + error.message;
+  } finally {
+    busy = false;
+    $("generate").disabled = false;
+  }
+};
+
+check();
+</script>
+
+</body>
+</html>
