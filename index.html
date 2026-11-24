@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b16">
+<title>TikTok Genesis AI</title>
+<style>
+:root{color-scheme:dark;--bg:#090b16;--panel:#12172a;--line:#2a3150;--accent:#a18cff;--text:#f4f5ff;--muted:#a8afcb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#20234a 0,#090b16 60%);font-family:system-ui,-apple-system,sans-serif;color:var(--text)}
+main{max-width:920px;margin:auto;padding:20px 14px 60px}.brand{text-align:center;padding:18px 0 24px}.brand h1{font-size:clamp(26px,7vw,42px);margin:0;letter-spacing:.03em}.brand p{color:var(--muted);margin:8px 0}
+.panel{background:rgba(18,23,42,.96);border:1px solid var(--line);border-radius:20px;padding:18px;margin:14px 0;box-shadow:0 12px 35px #0003}
+h2{font-size:20px;margin:0 0 12px}label{display:block;font-weight:650;margin:12px 0 7px}input,select,textarea{width:100%;background:#090d1d;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit}textarea{min-height:100px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btn{width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:750;background:linear-gradient(120deg,#8d7aff,#b18cff);color:#101124;margin-top:14px;cursor:pointer}.btn.secondary{background:#222943;color:var(--text);border:1px solid var(--line)}.btn:disabled{opacity:.5}
+.small{font-size:13px;color:var(--muted)}.status{white-space:pre-wrap;color:var(--muted);font-size:14px;margin-top:10px}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.thumb{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;aspect-ratio:9/16;background:#080a12}.thumb img{width:100%;height:100%;object-fit:cover}.thumb button{position:absolute;top:6px;right:6px;border:0;border-radius:20px;background:#000b;color:white;padding:5px 8px}
+.preview{max-width:300px;margin:12px auto 0;aspect-ratio:9/16;background:#000;border-radius:18px;overflow:hidden;border:1px solid var(--line)}canvas{width:100%;height:100%;display:block}
+.rowbuttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.resultimg{width:100%;max-width:300px;display:block;border-radius:14px;margin:12px auto}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.panel{padding:15px}.thumbs{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body><main>
+<header class="brand"><h1>🎵 TIKTOK GENESIS AI</h1><p>Photos → création verticale → vidéo prête à exporter</p></header>
+
+<section class="panel">
+<h2>1. Importer tes photos</h2>
+<p class="small">Choisis plusieurs photos depuis ton téléphone. Elles restent dans ton navigateur pour le montage local.</p>
+<label for="photos">Photos du téléphone</label><input id="photos" type="file" accept="image/*" multiple>
+<div id="thumbs" class="thumbs"></div>
+<div class="rowbuttons"><button class="btn secondary" id="selectAll">Tout sélectionner</button><button class="btn secondary" id="clear">Effacer la sélection</button></div>
+<div id="uploadStatus" class="status"></div>
+</section>
+
+<section class="panel">
+<h2>2. Style et scénario</h2>
+<div class="grid">
+<div><label for="style">Style vidéo</label><select id="style">
+<option value="cinematic">Cinématique</option><option value="anime">Anime</option><option value="fantasy">Fantasy / magie</option><option value="luxury">Luxe</option><option value="cyberpunk">Cyberpunk</option><option value="vintage">Vintage</option><option value="travel">Voyage</option><option value="motivation">Motivation</option><option value="fashion">Mode</option><option value="african">Légendes africaines</option>
+</select></div>
+<div><label for="duration">Durée par photo</label><select id="duration"><option value="2">2 secondes</option><option value="3" selected>3 secondes</option><option value="4">4 secondes</option><option value="5">5 secondes</option></select></div>
+<div><label for="ratio">Format</label><select id="ratio"><option value="9:16">TikTok vertical 9:16</option><option value="1:1">Carré 1:1</option><option value="16:9">Paysage 16:9</option></select></div>
+<div><label for="motion">Animation</label><select id="motion"><option value="zoom">Zoom cinématique</option><option value="pan">Panoramique</option><option value="fade">Fondu</option><option value="static">Sans mouvement</option></select></div>
+</div>
+<label for="prompt">Prompt / idée de la vidéo</label><textarea id="prompt" placeholder="Ex. Une transformation héroïque, lumière dorée, ambiance épique, caméra lente..."></textarea>
+<button class="btn" id="build">Préparer l'aperçu vidéo</button>
+<div id="buildStatus" class="status"></div>
+<div class="preview"><canvas id="canvas" width="720" height="1280"></canvas></div>
+<button class="btn" id="export" disabled>Exporter la vidéo WebM</button>
+<div id="exportStatus" class="status"></div>
+</section>
+
+<section class="panel">
+<h2>3. Générer un visuel IA (optionnel)</h2>
+<p class="small">Cette fonction utilise le point d'accès image déjà présent dans ton serveur : <code>/api/generate-image</code>. Elle génère une image à partir du prompt, pas une animation IA de la photo importée.</p>
+<label for="api">URL du serveur API (laisser vide si même domaine)</label><input id="api" placeholder="https://ton-service.onrender.com">
+<button class="btn secondary" id="genImage">Générer une image IA et l'ajouter au montage</button>
+<div id="aiStatus" class="status"></div><div id="aiResult"></div>
+</section>
+<section class="panel">
+<h2>État du serveur</h2><button class="btn secondary" id="health">Vérifier la connexion API</button><div id="healthStatus" class="status"></div>
+<p class="small">Les photos importées et le montage restent locaux. Le serveur actuel ne réalise pas encore de génération vidéo IA ni de transformation image-vers-image.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let items=[], selected=new Set(), previewImages=[], previewReady=false, renderLoop=null;
+const styleText={
+cinematic:"cinematic film look, dramatic lighting, elegant camera movement",
+anime:"anime illustration style, expressive colors, animated film look",
+fantasy:"epic fantasy, magical atmosphere, glowing particles",
+luxury:"luxury editorial, premium fashion, elegant golden lighting",
+cyberpunk:"cyberpunk neon, futuristic city, vivid night colors",
+vintage:"vintage film, nostalgic warm colors, subtle grain",
+travel:"travel film, beautiful destination, sweeping cinematic view",
+motivation:"inspiring cinematic atmosphere, powerful visual mood",
+fashion:"fashion editorial, stylish composition, runway atmosphere",
+african:"African legends inspired, rich traditional patterns, majestic cinematic atmosphere"
+};
+function apiBase(){return $("api").value.trim().replace(/\/+$/,"")}
+function drawThumbs(){
+ const wrap=$("thumbs");wrap.replaceChildren();
+ items.forEach((it,i)=>{const div=document.createElement("div");div.className="thumb";const img=document.createElement("img");img.src=it.url;img.alt="Photo "+(i+1);div.append(img);
+ const b=document.createElement("button");b.textContent=selected.has(i)?"✓":"＋";b.title="Sélectionner";b.onclick=()=>{selected.has(i)?selected.delete(i):selected.add(i);drawThumbs()};div.append(b);wrap.append(div)});
+ $("uploadStatus").textContent=items.length?`${selected.size} photo(s) sélectionnée(s) sur ${items.length}.`:"Aucune photo importée.";
+}
+$("photos").addEventListener("change",e=>{
+ items.forEach(x=>URL.revokeObjectURL(x.url));items=[];selected.clear();
+ for(const f of e.target.files||[]){if(f.type.startsWith("image/")){const url=URL.createObjectURL(f);items.push({file:f,url});selected.add(items.length-1)}}
+ drawThumbs();previewReady=false;$("export").disabled=true;
+});
+$("selectAll").onclick=()=>{selected=new Set(items.map((_,i)=>i));drawThumbs()};
+$("clear").onclick=()=>{selected.clear();drawThumbs()};
+function dimensions(){const r=$("ratio").value;if(r==="16:9")return[1280,720];if(r==="1:1")return[900,900];return[720,1280]}
+function loadImage(url){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=url})}
+function drawCover(ctx,img,x,y,w,h,progress=0){
+ const scale=Math.max(w/img.width,h/img.height)*(1+(($("motion").value==="zoom")?.12:0)*progress);
+ const sw=w/scale,sh=h/scale;
+ let sx=(img.width-sw)/2,sy=(img.height-sh)/2;
+ if($("motion").value==="pan")sx=(img.width-sw)*progress;
+ ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);
+}
+function drawFrame(time=0){
+ const canvas=$("canvas"),ctx=canvas.getContext("2d"),[w,h]=dimensions();
+ canvas.width=w;canvas.height=h;
+ ctx.fillStyle="#05060c";ctx.fillRect(0,0,w,h);
+ if(!previewImages.length)return;
+ const dur=Number($("duration").value)*1000,total=dur*previewImages.length;
+ const t=time%total,index=Math.min(previewImages.length-1,Math.floor(t/dur)),p=(t%dur)/dur;
+ const img=previewImages[index];
+ if(img)drawCover(ctx,img,0,0,w,h,p);
+ // Light overlay and caption
+ const grad=ctx.createLinearGradient(0,h*.58,0,h);grad.addColorStop(0,"#0000");grad.addColorStop(1,"#000b");ctx.fillStyle=grad;ctx.fillRect(0,0,w,h);
+ const prompt=$("prompt").value.trim();
+ if(prompt){ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font=`bold ${Math.max(22,w*.045)}px system-ui`;const words=prompt.split(/\s+/);let lines=[],line="";for(const word of words){const test=line?line+" "+word:word;if(ctx.measureText(test).width>w*.82&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);lines.slice(0,3).forEach((l,i)=>ctx.fillText(l,w/2,h*.82+i*Math.max(28,w*.055)))}
+ ctx.fillStyle="#ffffffcc";ctx.textAlign="left";ctx.font=`${Math.max(14,w*.025)}px system-ui`;ctx.fillText("TikTok Genesis",w*.06,h*.94);
+}
+$("build").onclick=async()=>{
+ if(!selected.size){$("buildStatus").textContent="Importe puis sélectionne au moins une photo.";return}
+ $("build").disabled=true;$("buildStatus").textContent="Chargement des photos et préparation…";
+ try{previewImages=[];for(const i of [...selected].sort((a,b)=>a-b)){previewImages.push(await loadImage(items[i].url))}
+ drawFrame(0);previewReady=true;$("export").disabled=false;
+ $("buildStatus").textContent=`Aperçu prêt : ${previewImages.length} scène(s), environ ${(previewImages.length*Number($("duration").value)).toFixed(0)} secondes.`;
+ }catch(e){$("buildStatus").textContent="Impossible de lire une photo. Réessaie avec une autre image."}
+ finally{$("build").disabled=false}
+};
+$("export").onclick=async()=>{
+ if(!previewReady)return;
+ const canvas=$("canvas"),[w,h]=dimensions();canvas.width=w;canvas.height=h;
+ const total=previewImages.length*Number($("duration").value),fps=24;
+ if(!canvas.captureStream||!window.MediaRecorder){$("exportStatus").textContent="Ton navigateur ne prend pas en charge l'export vidéo. Essaie Safari ou Chrome récent.";return}
+ const stream=canvas.captureStream(fps);let mime="video/webm;codecs=vp9";if(!MediaRecorder.isTypeSupported(mime))mime="video/webm";
+ let recorder;try{recorder=new MediaRecorder(stream,{mimeType:mime})}catch(e){$("exportStatus").textContent="Export vidéo non pris en charge par ce navigateur.";return}
+ const chunks=[];recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+ recorder.onstop=()=>{const blob=new Blob(chunks,{type:"video/webm"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="tiktok-genesis.webm";a.click();$("exportStatus").textContent="Vidéo WebM exportée. Sur iPhone, ouvre le fichier téléchargé puis partage-le ou enregistre-le dans Fichiers.";stream.getTracks().forEach(t=>t.stop())};
+ $("export").disabled=true;$("exportStatus").textContent="Export en cours… garde cette page ouverte.";
+ recorder.start();const start=performance.now();
+ function tick(now){const elapsed=(now-start)/1000;drawFrame(elapsed*1000);if(elapsed<total){requestAnimationFrame(tick)}else{recorder.stop();$("export").disabled=false}}
+ requestAnimationFrame(tick);
+};
+$("genImage").onclick=async()=>{
+ const p=$("prompt").value.trim();if(p.length<3){$("aiStatus").textContent="Écris un prompt de 3 caractères minimum.";return}
+ $("genImage").disabled=true;$("aiStatus").textContent="Demande envoyée au serveur…";$("aiResult").replaceChildren();
+ try{const r=await fetch(apiBase()+"/api/generate-image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt:`${p}, ${styleText[$("style").value]}, vertical social media composition`,aspect_ratio:"9:16"})});
+ const d=await r.json();if(!r.ok)throw Error(d.error||"Erreur API");let url=Array.isArray(d.output)?d.output[0]:d.output;
+ if(!url)throw Error("Le serveur n'a pas encore renvoyé d'image. Vérifie son état.");
+ const img=document.createElement("img");img.src=url;img.className="resultimg";img.alt="Image générée";
+ img.onload=()=>{const b=document.createElement("button");b.className="btn secondary";b.textContent="Ajouter cette image au montage";b.onclick=()=>{items.push({file:null,url});selected.add(items.length-1);drawThumbs();$("aiStatus").textContent="Image ajoutée à la sélection."};$("aiResult").append(b)};
+ $("aiResult").append(img);$("aiStatus").textContent="Image IA reçue.";
+ }catch(e){$("aiStatus").textContent=e.message||"Erreur de génération"}
+ finally{$("genImage").disabled=false}
+};
+$("health").onclick=async()=>{ $("healthStatus").textContent="Vérification…";try{const r=await fetch(apiBase()+"/api/health");const d=await r.json();$("healthStatus").textContent=JSON.stringify(d,null,2)}catch(e){$("healthStatus").textContent="Connexion impossible : vérifie l'URL et le déploiement."}};
+</script></body></html>
