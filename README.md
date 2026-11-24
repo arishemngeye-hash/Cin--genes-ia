@@ -1,22 +1,17 @@
-# TikTok Genesis AI — prototype v1
+# Cin--genes-ia
 
-Cette version remplace l'interface web par une interface TikTok verticale.
+Application web mobile de création de montage vertical à partir de photos.
 
-## Installation dans le dépôt existant
+## Déploiement sur Render
+- Build Command : `npm install`
+- Start Command : `npm start`
+- Runtime : Node.js 18 ou plus récent
+- Ajoute `REPLICATE_API_TOKEN` dans Environment pour activer la génération d'image IA.
+- Optionnel : `REPLICATE_API_MODEL` n'est pas utilisé; configure `REPLICATE_IMAGE_MODEL` si tu souhaites remplacer le modèle (défaut `black-forest-labs/flux-schnell`).
 
-1. Téléverse le dossier `public` dans ton dépôt GitHub (à la racine, à côté de `server.js`).
-2. Conserve le `server.js` actuel et `package.json` : l'interface appelle `/api/health` et `/api/generate-image`.
-3. Vérifie que `server.js` contient `app.use(express.static("public"));`.
-4. Déploie sur Render et ouvre l'adresse du service.
+Le montage photo/vidéo local fonctionne dans le navigateur. La génération d'image IA utilise Replicate et peut nécessiter des crédits.
 
-## Fonctionnalités
-
-- Import multiple depuis le téléphone et sélection des photos.
-- Styles prédéfinis et prompt.
-- Aperçu vertical, animations simples (zoom/pan) et export WebM local via le navigateur.
-- Génération d'image text-to-image avec l'endpoint existant `/api/generate-image`.
-- Ajout de l'image IA générée au montage.
-
-## Limites à connaître
-
-Le serveur actuel est un endpoint Replicate text-to-image. Il ne reçoit pas les photos importées comme références et ne produit pas de vidéo IA image-to-video. L'export WebM actuel crée un montage animé à partir des photos (zoom/pan), pas une vidéo générée par un modèle vidéo. Le modèle/API vidéo devra être ajouté séparément pour l'animation IA réelle. Le navigateur doit prendre en charge `MediaRecorder` et `canvas.captureStream`.
+Structure :
+- `server.js`
+- `package.json`
+- `public/index.html`
